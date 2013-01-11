@@ -1,7 +1,11 @@
 module JokerDMAPI
   module Domain
     def domain_info(domain)
-      response = query 'query-whois', domain: domain
+      begin
+        response = query 'query-whois', domain: domain
+      rescue
+        return nil
+      end
       result = {}
       response[:body].split("\n").each do |line|
         line.slice! /^domain\./

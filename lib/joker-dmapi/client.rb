@@ -42,7 +42,7 @@ module JokerDMAPI
 
     def parse_response(response)
       response.each_line { |line| puts "<< #{line}" } if ENV['JOKER_DMAPI_DEBUG']
-      parts = response.split("\n\n")
+      parts = response.split "\n\n", 2
       {
         headers: parts[0].split("\n").inject({}) { |h, line| h.merge! parse_line line },
         body: parts[1]
@@ -69,13 +69,14 @@ module JokerDMAPI
         response = request(:login, username: @username, password: @password)
         check_status response
         @auth_sid = response[:headers][:auth_sid]
+        @tlds = response[:body].split "\n"
       end
       @auth_sid
     end
 
     def query(request, params = {})
       params['auth-sid'] = auth_sid
-      response = request(request, params)
+      response = request(request, params.inject({}) { |r, (key, value)| r[key.to_s.gsub('_', '-')] = value; r })
       check_status response
       response
     end
