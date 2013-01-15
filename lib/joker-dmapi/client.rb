@@ -1,5 +1,6 @@
 require "net/http"
 require "addressable/uri"
+require "joker-dmapi/result"
 require "joker-dmapi/contact"
 require "joker-dmapi/domain"
 
@@ -9,6 +10,7 @@ module JokerDMAPI
   class Client
     URI = 'https://dmapi.joker.com:443/request/'
 
+    include JokerDMAPI::Result
     include JokerDMAPI::Contact
     include JokerDMAPI::Domain
 
@@ -40,13 +42,18 @@ module JokerDMAPI
       end
     end
 
+    def parse_attributes(attributes)
+      attributes.split("\n").inject({}) do |h, line|
+        attribute = parse_line line
+        h.merge!(attribute) if attribute.is_a? Hash
+        h
+      end
+    end
+
     def parse_response(response)
       response.each_line { |line| puts "<< #{line}" } if ENV['JOKER_DMAPI_DEBUG']
       parts = response.split "\n\n", 2
-      {
-        headers: parts[0].split("\n").inject({}) { |h, line| h.merge! parse_line line },
-        body: parts[1]
-      }
+      { headers: parse_attributes(parts[0]), body: parts[1] }
     end
 
     def request(request, params = {})
@@ -54,6 +61,7 @@ module JokerDMAPI
       uri.query_values = params
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true
+      #http.verify_mode = OpenSSL::SSL::VERIFY_NONE
       puts ">> #{uri.request_uri}" if ENV['JOKER_DMAPI_DEBUG']
       parse_response http.request(Net::HTTP::Get.new(uri.request_uri)).body
     end

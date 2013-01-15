@@ -5,11 +5,7 @@ module JokerDMAPI
     CONTACT_LENGTH_LIMIT = %w(biz cn eu)
 
     def contact_info(handle)
-      begin
-        response = query 'query-whois', contact: handle
-      rescue
-        return nil
-      end
+      response = query 'query-whois', contact: handle
       result = {}
       response[:body].split("\n").each do |line|
         line.slice! /^contact\./
@@ -22,6 +18,7 @@ module JokerDMAPI
             result[:address] = [] unless result.has_key? :address
             result[:address] << value
           when :state then next if value == "--"
+          when :organization then next if value == "-" or value.empty?
           when :created_date, :modified_date then
             result[key] = DateTime.parse value
           else
@@ -32,35 +29,33 @@ module JokerDMAPI
     end
 
     def contact_create(fields)
-      response = query 'contact-create', contact_prepare(fields)
-      response[:headers][:proc_id]
+      query 'contact-create', contact_prepare(fields)
     end
 
-    def contact_update(handle, fields)
-      fields = contact_prepare(fields)
-      fields[:handle] = handle
-      response = query 'contact-modify', fields
-      query 'result-delete', { 'proc-id' => response[:headers][:proc_id] }
-    end
-
-    def contact_create_handle(proc_id)
-      response = query 'result-retrieve', { 'proc-id' => proc_id }
-      response[:body].split("\n\n", 1)[0].split("\n").each do |line|
-        next unless line.match /^Object-Name:\s+(\S+)$/
-        response[:handle] = $1
-        break
-      end
-      if response.has_key? :handle and response[:handle] =~ /\d+/
-        query 'result-delete', { 'proc-id' => proc_id }
-        response[:handle]
+    def contact_create_result(proc_id)
+      result = parse_attributes(result_retrieve(proc_id)[:body].split("\n\n", 1)[0])
+      if result.has_key?(:completion_status) and result[:completion_status] == 'ack'
+        result_delete proc_id
+        result[:object_name]
       else
         nil
       end
     end
 
-    def contact_delete(handle)
-      response = query 'contact-delete', { handle: handle }
-      query 'result-delete', { 'proc-id' => response[:headers][:proc_id] }
+    def contact_update(handle, fields)
+      fields = contact_prepare(fields)
+      fields[:handle] = handle
+      query 'contact-modify', fields
+    end
+
+    def contact_update_result(proc_id)
+      result = parse_attributes(result_retrieve(proc_id)[:body].split("\n\n", 1)[0])
+      if result.has_key?(:completion_status) and result[:completion_status] == 'ack'
+        result_delete proc_id
+        true
+      else
+        false
+      end
     end
 
     private
