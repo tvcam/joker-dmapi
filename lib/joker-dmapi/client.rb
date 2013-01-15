@@ -31,6 +31,13 @@ module JokerDMAPI
       end
     end
 
+    def query(request, params = {})
+      params['auth-sid'] = auth_sid
+      response = request(request, params.inject({}) { |r, (key, value)| r[key.to_s.gsub('_', '-')] = value; r })
+      check_status response
+      response
+    end
+
     private
 
     def parse_line(line)
@@ -81,13 +88,5 @@ module JokerDMAPI
       end
       @auth_sid
     end
-
-    def query(request, params = {})
-      params['auth-sid'] = auth_sid
-      response = request(request, params.inject({}) { |r, (key, value)| r[key.to_s.gsub('_', '-')] = value; r })
-      check_status response
-      response
-    end
-
   end
 end
