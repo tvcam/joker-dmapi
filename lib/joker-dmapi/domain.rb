@@ -121,5 +121,11 @@ module JokerDMAPI
     def domain_renew(domain, period)
       query 'domain-renew', { domain: domain, period: (12 * period) }
     end
+
+    def domain_registrant_update(domain, fields)
+      fields = contact_prepare(fields)
+      fields[:domain] = domain
+      query 'domain-owner-change', fields
+    end
   end
 end
