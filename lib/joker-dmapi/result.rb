@@ -4,7 +4,7 @@ module JokerDMAPI
     #
     # Get <tt>proc_id</tt>
     # Returned <tt>true</tt> if done (result deleted)
-    def result_complete?(proc_id)
+    def complete?(proc_id)
       result = parse_attributes(result_retrieve(proc_id)[:body].split("\n\n", 1)[0])
       if result.has_key?(:completion_status) and result[:completion_status] == 'ack'
         result_delete proc_id

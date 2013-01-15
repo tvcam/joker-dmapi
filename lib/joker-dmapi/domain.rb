@@ -61,8 +61,7 @@ module JokerDMAPI
 
     # Register new domain
     #
-    # Takes domain's fields as hash:
-    # [<tt>:name</tt>] the FQDN
+    # Takes <tt>domain</tt> and domain's fields as hash:
     # [<tt>:period</tt>] registration period (years!!!)
     # [<tt>:registrant</tt>] registrant (owner) handle (registered)
     # [<tt>:admin</tt>] admin handle (registered)
@@ -74,12 +73,12 @@ module JokerDMAPI
     # [<tt>:headers</tt>]
     #   [<tt>:proc_id</tt>] process ID (used at check result)
     #   [<tt>:tracking_id</tt>] tracking ID
-    def domain_create(fields)
-      unless ([ :name, :period, :registrant, :admin, :tech, :billing, :nservers ] - fields.keys).empty?
+    def domain_create(domain, fields)
+      unless ([ :period, :registrant, :admin, :tech, :billing, :nservers ] - fields.keys).empty?
         raise ArgumentError, "Required fields not found"
       end
       query 'domain-register', {
-        domain: fields[:name],
+        domain: domain,
         period: (fields[:period] * 12),
         owner_c: fields[:registrant],
         admin_c: fields[:admin],
@@ -102,7 +101,7 @@ module JokerDMAPI
     #   [<tt>:proc_id</tt>] process ID (used at check result)
     #   [<tt>:tracking_id</tt>] tracking ID
     def domain_update(domain, fields)
-      unless fields.has_key? :name
+      unless ([ :admin, :tech, :billing, :nservers ] - fields.keys).empty?
         raise ArgumentError, "Required fields not found"
       end
       query 'domain-modify', {
@@ -122,6 +121,9 @@ module JokerDMAPI
       query 'domain-renew', { domain: domain, period: (12 * period) }
     end
 
+    # Update registrant's info
+    #
+    # Takes <tt>domain</tt> and fields (see contact_update)
     def domain_registrant_update(domain, fields)
       fields = contact_prepare(fields)
       fields[:domain] = domain
