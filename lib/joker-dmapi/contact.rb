@@ -4,6 +4,24 @@ module JokerDMAPI
     CONTACT_ALLOWED = CONTACT_REQUIRED + [ :organization, :state, :fax ]
     CONTACT_LENGTH_LIMIT = %w(biz cn eu)
 
+    # Returns the information about a contact
+    #
+    # Takes handler as string
+    #
+    # Returned is a hash:
+    # [<tt>:name</tt>] the contact's name
+    # [<tt>:organization</tt>] the contact's organization name
+    # [<tt>:address</tt>] an array containing from one to three elements with contact's address
+    # [<tt>:city</tt>] the contact's city
+    # [<tt>:state</tt>] the contact's state
+    # [<tt>:postal_code</tt>] the contact's postal code
+    # [<tt>:country</tt>] the contact's country code (UA)
+    # [<tt>:email</tt>] the contact's email address
+    # [<tt>:phone</tt>] the contact's voice phone number
+    # [<tt>:fax</tt>] the contact's fax number
+    # [<tt>:handle</tt>] the contact's handler from Joker
+    # [<tt>:created_date</tt>] the date and time of contact created
+    # [<tt>:modified_date</tt>] the date and time of contact modified
     def contact_info(handle)
       response = query 'query-whois', contact: handle
       result = {}
@@ -28,10 +46,33 @@ module JokerDMAPI
       result
     end
 
+    # Create new contact
+    #
+    # Takes contact's fields as hash:
+    # [<tt>:tld</tt>] the TLD to use new contact
+    # [<tt>:name</tt>] the contact's name
+    # [<tt>:organization</tt>] the contact's organization name
+    # [<tt>:address</tt>] an array containing from one to three elements with contact's address
+    # [<tt>:city</tt>] the contact's city
+    # [<tt>:state</tt>] the contact's state
+    # [<tt>:postal_code</tt>] the contact's postal code
+    # [<tt>:country</tt>] the contact's country code (UA)
+    # [<tt>:email</tt>] the contact's email address
+    # [<tt>:phone</tt>] the contact's voice phone number
+    # [<tt>:fax</tt>] the contact's fax number
+    #
+    # Returned is a hash of response:
+    # [<tt>:headers</tt>]
+    #   [<tt>:proc_id</tt>] process ID (used at check result)
+    #   [<tt>:tracking_id</tt>] tracking ID
     def contact_create(fields)
       query 'contact-create', contact_prepare(fields)
     end
 
+    # Check result of create contact
+    #
+    # Get <tt>proc_id</tt>
+    # Returned contact's handle name (and delete result) or <tt>nil</tt> if don't ready
     def contact_create_result(proc_id)
       result = parse_attributes(result_retrieve(proc_id)[:body].split("\n\n", 1)[0])
       if result.has_key?(:completion_status) and result[:completion_status] == 'ack'
@@ -42,12 +83,34 @@ module JokerDMAPI
       end
     end
 
+    # Update contact
+    #
+    # Takes <tt>handle</tt> to select contact and contact's fields as hash:
+    # [<tt>:name</tt>] the contact's name
+    # [<tt>:organization</tt>] the contact's organization name
+    # [<tt>:address</tt>] an array containing from one to three elements with contact's address
+    # [<tt>:city</tt>] the contact's city
+    # [<tt>:state</tt>] the contact's state
+    # [<tt>:postal_code</tt>] the contact's postal code
+    # [<tt>:country</tt>] the contact's country code (UA)
+    # [<tt>:email</tt>] the contact's email address
+    # [<tt>:phone</tt>] the contact's voice phone number
+    # [<tt>:fax</tt>] the contact's fax number
+    #
+    # Returned is a hash of response:
+    # [<tt>:headers</tt>]
+    #   [<tt>:proc_id</tt>] process ID (used at check result)
+    #   [<tt>:tracking_id</tt>] tracking ID
     def contact_update(handle, fields)
       fields = contact_prepare(fields)
       fields[:handle] = handle
       query 'contact-modify', fields
     end
 
+    # Check result of update contact
+    #
+    # Get <tt>proc_id</tt>
+    # Returned <tt>true</tt> if done (result deleted)
     def contact_update_result(proc_id)
       result = parse_attributes(result_retrieve(proc_id)[:body].split("\n\n", 1)[0])
       if result.has_key?(:completion_status) and result[:completion_status] == 'ack'
