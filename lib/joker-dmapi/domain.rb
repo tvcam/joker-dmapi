@@ -1,5 +1,30 @@
 module JokerDMAPI
   module Domain
+    # Returns the information about a domain
+    #
+    # Takes FQDN as string
+    #
+    # Returned is a hash:
+    # [<tt>:fqdn</tt>] FQDN
+    # [<tt>:status</tt>] domain status
+    # [<tt>:registrant</tt>] registrant (owner) as hash keys:
+    #   [<tt>:name</tt>] registrant's name
+    #   [<tt>:organization</tt>] registrant's organization
+    #   [<tt>:address</tt>] an array of registrant's address
+    #   [<tt>:postal_code</tt>] registrant's postal code
+    #   [<tt>:country</tt>] registrant's country code
+    #   [<tt>:owner_c_email</tt>] owner's email address
+    #   [<tt>:email</tt>] registrant's email address
+    #   [<tt>:phone</tt>] registrant's voice phone number
+    #   [<tt>:fax</tt>] registrant's fax number
+    # [<tt>:reseller_lines</tt>] an array of reseller data
+    # [<tt>:admin_c</tt>] registrant's admin-c handle
+    # [<tt>:tech_c</tt>] registrant's tech-c handle
+    # [<tt>:billing_c</tt>] registrant's billing-c handle
+    # [<tt>:nservers</tt>] an array of NS servers
+    # [<tt>:created_date</tt>] date and time of creation
+    # [<tt>:modified_date</tt>] date and time of modification
+    # [<tt>:expires</tt>] date and time of expiration
     def domain_info(domain)
       response = query 'query-whois', domain: domain
       result = {}
@@ -32,6 +57,69 @@ module JokerDMAPI
         end
       end
       result
+    end
+
+    # Register new domain
+    #
+    # Takes domain's fields as hash:
+    # [<tt>:name</tt>] the FQDN
+    # [<tt>:period</tt>] registration period (years!!!)
+    # [<tt>:registrant</tt>] registrant (owner) handle (registered)
+    # [<tt>:admin</tt>] admin handle (registered)
+    # [<tt>:tech</tt>] tech handle (registered)
+    # [<tt>:billing</tt>] billing handle (registered)
+    # [<tt>:nservers</tt>] an array of NS servers
+    #
+    # Returned is a hash of response:
+    # [<tt>:headers</tt>]
+    #   [<tt>:proc_id</tt>] process ID (used at check result)
+    #   [<tt>:tracking_id</tt>] tracking ID
+    def domain_create(fields)
+      unless ([ :name, :period, :registrant, :admin, :tech, :billing, :nservers ] - fields.keys).empty?
+        raise ArgumentError, "Required fields not found"
+      end
+      query 'domain-register', {
+        domain: fields[:name],
+        period: (fields[:period] * 12),
+        owner_c: fields[:registrant],
+        admin_c: fields[:admin],
+        tech_c: fields[:tech],
+        billing_c: fields[:billing],
+        ns_list: fields[:nservers].join(':')
+      }
+    end
+
+    # Update domain
+    #
+    # Takes <tt>domain</tt> and domain's fields as hash:
+    # [<tt>:admin</tt>] admin handle (registered)
+    # [<tt>:tech</tt>] tech handle (registered)
+    # [<tt>:billing</tt>] billing handle (registered)
+    # [<tt>:nservers</tt>] an array of NS servers
+    #
+    # Returned is a hash of response:
+    # [<tt>:headers</tt>]
+    #   [<tt>:proc_id</tt>] process ID (used at check result)
+    #   [<tt>:tracking_id</tt>] tracking ID
+    def domain_update(domain, fields)
+      unless fields.has_key? :name
+        raise ArgumentError, "Required fields not found"
+      end
+      query 'domain-modify', {
+        domain: domain,
+        admin_c: fields[:admin],
+        tech_c: fields[:tech],
+        billing_c: fields[:billing],
+        ns_list: fields[:nservers].join(':')
+      }
+    end
+
+    # Renew domain
+    #
+    # Takes <tt>domain</tt> and <tt>period</tt>
+    # WARNING!!! <tt>period</tt> in YEARS
+    def domain_renew(domain, period)
+      query 'domain-renew', { domain: domain, period: (12 * period) }
     end
   end
 end
