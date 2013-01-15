@@ -107,6 +107,12 @@ module JokerDMAPI
       query 'contact-modify', fields
     end
 
+    # Delete contact
+    # Takes <tt>handle</tt>
+    def contact_delete(handle)
+      query 'contact-delete', { handle: handle }
+    end
+
     private
 
     def contact_prepare(fields)
