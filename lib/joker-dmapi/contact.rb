@@ -107,20 +107,6 @@ module JokerDMAPI
       query 'contact-modify', fields
     end
 
-    # Check result of update contact
-    #
-    # Get <tt>proc_id</tt>
-    # Returned <tt>true</tt> if done (result deleted)
-    def contact_update_result(proc_id)
-      result = parse_attributes(result_retrieve(proc_id)[:body].split("\n\n", 1)[0])
-      if result.has_key?(:completion_status) and result[:completion_status] == 'ack'
-        result_delete proc_id
-        true
-      else
-        false
-      end
-    end
-
     private
 
     def contact_prepare(fields)
