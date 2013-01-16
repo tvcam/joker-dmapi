@@ -1,6 +1,6 @@
 # Joker DMAPI client library
 
-https://joker.com/faq/category/33/22-dmapi.html
+Description of the API can be found at https://joker.com/faq/category/33/22-dmapi.html
 
 ## Installation
 
