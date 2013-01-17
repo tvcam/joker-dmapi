@@ -72,7 +72,7 @@ module JokerDMAPI
     #   [<tt>:proc_id</tt>] process ID (used at check result)
     #   [<tt>:tracking_id</tt>] tracking ID
     def contact_create(fields)
-      query 'contact-create', contact_prepare(fields)
+      query :contact_create, contact_prepare(fields)
     end
 
     # Check result of create contact
@@ -81,11 +81,15 @@ module JokerDMAPI
     # Returned contact's handle name (and delete result) or <tt>nil</tt> if don't ready
     def contact_create_result(proc_id)
       result = parse_attributes(result_retrieve(proc_id)[:body].split("\n\n", 1)[0])
-      if result.has_key?(:completion_status) and result[:completion_status] == 'ack'
-        result_delete proc_id
-        result[:object_name]
-      else
-        nil
+      return nil unless result.has_key? :completion_status
+      case result[:completion_status]
+        when 'ack' then
+          result_delete proc_id
+          result[:object_name]
+        when 'nack' then
+          raise_response response
+        else
+          nil
       end
     end
 
