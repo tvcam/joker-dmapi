@@ -26,39 +26,43 @@ module JokerDMAPI
     # [<tt>:modified_date</tt>] date and time of modification
     # [<tt>:expires</tt>] date and time of expiration
     def domain_info(domain)
-      response = query 'query-whois', domain: domain
-      raise_response response
-      return nil if error?
-      result = {}
-      response[:body].split("\n").each do |line|
-        line.slice! /^domain\./
-        line_parsed = parse_line(line)
-        next if line_parsed.is_a? String
-        key, value = line_parsed.first
-        case key
-          when :fqdn, :status then result.merge! line_parsed
-          when :name, :organization, :city, :postal_code, :country, :owner_c_email, :email, :phone, :fax then
-            result[:registrant] = {} unless result.has_key? :registrant
-            result[:registrant].merge! line_parsed
-          when :address_1, :address_2, :address_3 then
-            result[:registrant] = {} unless result.has_key? :registrant
-            result[:registrant][:address] = [] unless result[:registrant].has_key? :address
-            result[:registrant][:address] << value
-          when :reseller_line then
-            result[:reseller_lines] = [] unless result.has_key? :reseller_lines
-            result[:reseller_lines] << value
-          when :created_date, :modified_date, :expires then
-            result[key] = DateTime.parse value
-          when :admin_c, :tech_c, :billing_c then
-            result.merge! line_parsed
-          when :nservers_nserver_handle then
-            result[:nservers] = [] unless result.has_key? :nservers
-            result[:nservers] << value
-          else
-            next
-        end
+      response = query_no_raise :query_whois, domain: domain
+      case response[:headers][:status_code]
+        when '2303' then return nil
+        when '0' then
+          result = {}
+          response[:body].split("\n").each do |line|
+            line.slice! /^domain\./
+            line_parsed = parse_line(line)
+            next if line_parsed.is_a? String
+            key, value = line_parsed.first
+            case key
+              when :fqdn, :status then result.merge! line_parsed
+              when :name, :organization, :city, :postal_code, :country, :owner_c_email, :email, :phone, :fax then
+                result[:registrant] = {} unless result.has_key? :registrant
+                result[:registrant].merge! line_parsed
+              when :address_1, :address_2, :address_3 then
+                result[:registrant] = {} unless result.has_key? :registrant
+                result[:registrant][:address] = [] unless result[:registrant].has_key? :address
+                result[:registrant][:address] << value
+              when :reseller_line then
+                result[:reseller_lines] = [] unless result.has_key? :reseller_lines
+                result[:reseller_lines] << value
+              when :created_date, :modified_date, :expires then
+                result[key] = DateTime.parse value
+              when :admin_c, :tech_c, :billing_c then
+                result.merge! line_parsed
+              when :nservers_nserver_handle then
+                result[:nservers] = [] unless result.has_key? :nservers
+                result[:nservers] << value
+              else
+                next
+            end
+          end
+          result
+        else
+          raise_response response
       end
-      result
     end
 
     # Register new domain
@@ -79,7 +83,7 @@ module JokerDMAPI
       unless ([ :period, :registrant, :admin, :tech, :billing, :nservers ] - fields.keys).empty?
         raise ArgumentError, "Required fields not found"
       end
-      query 'domain-register', {
+      query :domain_register, {
         domain: domain,
         period: (fields[:period] * 12),
         owner_c: fields[:registrant],
@@ -106,7 +110,7 @@ module JokerDMAPI
       unless ([ :admin, :tech, :billing, :nservers ] - fields.keys).empty?
         raise ArgumentError, "Required fields not found"
       end
-      query 'domain-modify', {
+      query :domain_modify, {
         domain: domain,
         admin_c: fields[:admin],
         tech_c: fields[:tech],
@@ -120,7 +124,7 @@ module JokerDMAPI
     # Takes <tt>domain</tt> and <tt>period</tt>
     # WARNING!!! <tt>period</tt> in YEARS
     def domain_renew(domain, period)
-      query 'domain-renew', { domain: domain, period: (12 * period) }
+      query :domain_renew, { domain: domain, period: (12 * period) }
     end
 
     # Update registrant's info
@@ -129,7 +133,7 @@ module JokerDMAPI
     def domain_registrant_update(domain, fields)
       fields = contact_prepare(fields)
       fields[:domain] = domain
-      query 'domain-owner-change', fields
+      query :domain_owner_change, fields
     end
   end
 end
