@@ -1,8 +1,8 @@
 require "net/http"
 require "addressable/uri"
-require "joker-dmapi/result"
-require "joker-dmapi/contact"
-require "joker-dmapi/domain"
+require "#{File.dirname(__FILE__)}/result"
+require "#{File.dirname(__FILE__)}/contact"
+require "#{File.dirname(__FILE__)}/domain"
 
 module JokerDMAPI
   VERSION = '0.0.1'
@@ -34,8 +34,12 @@ module JokerDMAPI
     def query(request, params = {})
       params['auth-sid'] = auth_sid
       response = request(request, params.inject({}) { |r, (key, value)| r[key.to_s.gsub('_', '-')] = value; r })
-      check_status response
+      @error = response[:headers][:status_code] == '0' ? false : true
       response
+    end
+
+    def error?
+      @error.nil? ? false : @error
     end
 
     private
@@ -73,16 +77,12 @@ module JokerDMAPI
       parse_response http.request(Net::HTTP::Get.new(uri.request_uri)).body
     end
 
-    def check_status(response)
-      if response[:headers][:status_code] != '0'
-        raise "#{response[:headers][:status_code]}: #{response[:headers][:error]}\n"
-      end
-    end
-
     def auth_sid
       if @auth_sid.nil?
         response = request(:login, username: @username, password: @password)
-        check_status response
+        unless response[:headers].has_key? :auth_sid
+          raise "Authentication error"
+        end
         @auth_sid = response[:headers][:auth_sid]
         @tlds = response[:body].split "\n"
       end

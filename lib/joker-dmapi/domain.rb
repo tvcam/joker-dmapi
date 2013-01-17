@@ -1,6 +1,6 @@
 module JokerDMAPI
   module Domain
-    # Returns the information about a domain
+    # Returns the information about a domain or <tt>nil</tt> if not exists
     #
     # Takes FQDN as string
     #
@@ -27,6 +27,8 @@ module JokerDMAPI
     # [<tt>:expires</tt>] date and time of expiration
     def domain_info(domain)
       response = query 'query-whois', domain: domain
+      raise_response response
+      return nil if error?
       result = {}
       response[:body].split("\n").each do |line|
         line.slice! /^domain\./

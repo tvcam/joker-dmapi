@@ -1,1 +1,1 @@
-require "joker-dmapi/client"
+require "#{File.dirname(__FILE__)}/joker-dmapi/client"

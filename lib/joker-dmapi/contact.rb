@@ -4,7 +4,7 @@ module JokerDMAPI
     CONTACT_ALLOWED = CONTACT_REQUIRED + [ :organization, :state, :fax ]
     CONTACT_LENGTH_LIMIT = %w(biz cn eu)
 
-    # Returns the information about a contact
+    # Returns the information about a contact or <tt>nil</tt> if not exists
     #
     # Takes handler as string
     #
@@ -24,6 +24,7 @@ module JokerDMAPI
     # [<tt>:modified_date</tt>] the date and time of contact modified
     def contact_info(handle)
       response = query 'query-whois', contact: handle
+      return nil if error?
       result = {}
       response[:body].split("\n").each do |line|
         line.slice! /^contact\./
