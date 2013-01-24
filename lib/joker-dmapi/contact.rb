@@ -25,7 +25,7 @@ module JokerDMAPI
     def contact_info(handle)
       response = query_no_raise :query_whois, contact: handle
       case response[:headers][:status_code]
-        when '2303' then return nil
+        when '2303' then nil
         when '0' then
           result = {}
           response[:body].split("\n").each do |line|
@@ -127,8 +127,7 @@ module JokerDMAPI
 
     def contact_prepare(fields)
       raise ArgumentError, "Required fields not found" unless (CONTACT_REQUIRED - fields.keys).empty?
-      auth_sid
-      raise ArgumentError, "TLD must be one of accepted" unless @tlds.include? fields[:tld]
+      raise ArgumentError, "TLD must be one of accepted" unless self.tlds.include? fields[:tld]
       if CONTACT_LENGTH_LIMIT.include? fields[:tld]
         [ :name, :organization, :city, :state ].each do |field|
           next unless fields.has_key? field

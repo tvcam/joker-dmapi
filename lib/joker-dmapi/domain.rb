@@ -28,7 +28,7 @@ module JokerDMAPI
     def domain_info(domain)
       response = query_no_raise :query_whois, domain: domain
       case response[:headers][:status_code]
-        when '2303' then return nil
+        when '2303' then nil
         when '0' then
           result = {}
           response[:body].split("\n").each do |line|

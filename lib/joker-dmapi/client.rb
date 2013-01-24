@@ -2,6 +2,7 @@ require "net/http"
 require "addressable/uri"
 require "#{File.dirname(__FILE__)}/result"
 require "#{File.dirname(__FILE__)}/contact"
+require "#{File.dirname(__FILE__)}/host"
 require "#{File.dirname(__FILE__)}/domain"
 
 module JokerDMAPI
@@ -12,16 +13,21 @@ module JokerDMAPI
 
     include JokerDMAPI::Result
     include JokerDMAPI::Contact
+    include JokerDMAPI::Host
     include JokerDMAPI::Domain
 
     def initialize(username, password, uri = DEFAULT_URI)
       @username, @password, @uri = username, password, uri
     end
 
-    def self.with_connection(username, password, uri = DEFAULT_URI, &block)
+    def self.connection(username, password, uri = DEFAULT_URI, &block)
       connection = self.new(username, password, uri)
-      yield connection
-      connection.logout
+      if block_given?
+        yield
+        connection.logout
+      else
+        connection
+      end
     end
 
     def logout
@@ -35,6 +41,11 @@ module JokerDMAPI
       response = query_no_raise request, params
       raise_response(response) unless response[:headers][:status_code] == '0'
       response
+    end
+
+    def tlds
+      auth_sid unless @auth_sid
+      @tlds
     end
 
     private
