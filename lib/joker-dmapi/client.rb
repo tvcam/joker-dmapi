@@ -23,7 +23,7 @@ module JokerDMAPI
     def self.connection(username, password, uri = DEFAULT_URI, &block)
       connection = self.new(username, password, uri)
       if block_given?
-        yield
+        yield connection
         connection.logout
       else
         connection
