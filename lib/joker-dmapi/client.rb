@@ -1,14 +1,15 @@
 require "net/http"
 require "addressable/uri"
+require "#{File.dirname(__FILE__)}/version"
 require "#{File.dirname(__FILE__)}/result"
 require "#{File.dirname(__FILE__)}/contact"
 require "#{File.dirname(__FILE__)}/host"
 require "#{File.dirname(__FILE__)}/domain"
 
 module JokerDMAPI
-  VERSION = '0.1.3'
-
   class Client
+    include JokerDMAPI::Version
+
     DEFAULT_URI = 'https://dmapi.joker.com:443/request/'
 
     include JokerDMAPI::Result

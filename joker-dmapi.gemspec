@@ -1,11 +1,11 @@
 # -*- encoding: utf-8 -*-
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'joker-dmapi'
+require 'joker-dmapi/version'
 
 Gem::Specification.new do |gem|
   gem.name          = "joker-dmapi"
-  gem.version       = JokerDMAPI::VERSION
+  gem.version       = JokerDMAPI::Version::VERSION
   gem.authors       = ["Yuriy Kolodovskyy"]
   gem.email         = %w{kolodovskyy@ukrindex.com}
   gem.description   = %q{Joker DMAPI client library}
