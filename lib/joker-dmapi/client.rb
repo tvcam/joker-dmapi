@@ -6,7 +6,7 @@ require "#{File.dirname(__FILE__)}/host"
 require "#{File.dirname(__FILE__)}/domain"
 
 module JokerDMAPI
-  VERSION = '0.1.2'
+  VERSION = '0.1.3'
 
   class Client
     DEFAULT_URI = 'https://dmapi.joker.com:443/request/'

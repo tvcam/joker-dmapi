@@ -1,3 +1,5 @@
+require "date"
+
 module JokerDMAPI
   module Contact
     CONTACT_REQUIRED = [ :tld, :name, :email, :address, :city, :postal_code, :country, :phone ]

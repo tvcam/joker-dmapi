@@ -1,4 +1,5 @@
 require "resolv"
+require "date"
 
 module JokerDMAPI
   module Host
@@ -15,6 +16,8 @@ module JokerDMAPI
             key, value = line_parsed.first
             case key
               when :fqdn then result[:host] = value
+              when :ip_address then result[:ipv4] = value
+              when :ip_address_v6 then result[:ipv6] = value
               when :created_date, :modified_date then
                 result[key] = DateTime.parse value
               else

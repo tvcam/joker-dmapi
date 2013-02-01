@@ -1,3 +1,5 @@
+require "date"
+
 module JokerDMAPI
   module Domain
     # Returns the information about a domain or <tt>nil</tt> if not exists
