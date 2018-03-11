@@ -35,8 +35,8 @@ module JokerDMAPI
     # [<tt>:phone</tt>] the contact's voice phone number
     # [<tt>:fax</tt>] the contact's fax number
     # [<tt>:handle</tt>] the contact's handler from Joker
-    # [<tt>:created_date</tt>] the date and time of contact created
-    # [<tt>:modified_date</tt>] the date and time of contact modified
+    # [<tt>:created_at</tt>] the date and time of contact created
+    # [<tt>:updated_at</tt>] the date and time of contact modified
     def contact_info(handle)
       response = query_no_raise :query_whois, contact: handle
       case response[:headers][:status_code]
