@@ -6,6 +6,11 @@ module JokerDMAPI
     CONTACT_ALLOWED = CONTACT_REQUIRED + [ :organization, :state, :fax ]
     CONTACT_LENGTH_LIMIT = %w(biz cn eu)
 
+    # Returns the all contacts
+    def query_contact_list
+      query :query_contact_list
+    end
+
     # Returns the information about a contact or <tt>nil</tt> if not exists
     #
     # Takes handler as string
