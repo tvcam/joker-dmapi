@@ -52,7 +52,10 @@ module JokerDMAPI
 
             case key
             when :created_date, :modified_date then
-              result[key] = DateTime.parse value
+              key = :created_at if key == :created_date
+              key = :updated_at if key == :modified_date
+
+              result[key] = DateTime.parse(value)
             else
               result.merge! line_parsed
             end
