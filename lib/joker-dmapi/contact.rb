@@ -8,7 +8,7 @@ module JokerDMAPI
 
     # Returns the all contacts
     def query_contact_list
-      query :query_contact_list
+      query 'query-contact-list'
     end
 
     # Returns the information about a contact or <tt>nil</tt> if not exists
