@@ -6,9 +6,17 @@ module JokerDMAPI
     CONTACT_ALLOWED = CONTACT_REQUIRED + [ :organization, :state, :fax ]
     CONTACT_LENGTH_LIMIT = %w(biz cn eu)
 
-    # Returns the all contacts
+    # Returns the all contacts or <tt>[]</tt> if not exists
     def query_contact_list
-      query 'query-contact-list'
+      response = query_no_raise :query_contact_list
+
+      case response[:headers][:status_code]
+      when '2303' then []
+      when '0' then
+        response[:body].split("\n")
+      else
+        raise_response(response)
+      end
     end
 
     # Returns the information about a contact or <tt>nil</tt> if not exists
