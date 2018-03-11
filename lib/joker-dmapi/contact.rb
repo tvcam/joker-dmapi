@@ -47,18 +47,14 @@ module JokerDMAPI
             line.slice! /^contact\./
             line_parsed = parse_line(line)
             next if line_parsed.is_a? String
+
             key, value = line_parsed.first
+
             case key
-              when :name then next if value == "- -"
-              when :address_1, :address_2, :address_3 then
-                result[:address] = [] unless result.has_key? :address
-                result[:address] << value
-              when :state then next if value == "--"
-              when :organization then next if value == "-" or value.empty?
-              when :created_date, :modified_date then
-                result[key] = DateTime.parse value
-              else
-                result.merge! line_parsed
+            when :created_date, :modified_date then
+              result[key] = DateTime.parse value
+            else
+              result.merge! line_parsed
             end
           end
           result
