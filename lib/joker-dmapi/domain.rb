@@ -12,7 +12,8 @@ module JokerDMAPI
     # [<tt>:registrant</tt>] registrant (owner) as hash keys:
     #   [<tt>:name</tt>] registrant's name
     #   [<tt>:organization</tt>] registrant's organization
-    #   [<tt>:address</tt>] an array of registrant's address
+    #   [<tt>:address_1</tt>]
+    #   [<tt>:address_2</tt>]
     #   [<tt>:postal_code</tt>] registrant's postal code
     #   [<tt>:country</tt>] registrant's country code
     #   [<tt>:owner_c_email</tt>] owner's email address
@@ -24,8 +25,8 @@ module JokerDMAPI
     # [<tt>:tech_c</tt>] registrant's tech-c handle
     # [<tt>:billing_c</tt>] registrant's billing-c handle
     # [<tt>:nservers</tt>] an array of NS servers
-    # [<tt>:created_date</tt>] date and time of creation
-    # [<tt>:modified_date</tt>] date and time of modification
+    # [<tt>:created_at</tt>] date and time of creation
+    # [<tt>:updated_at</tt>] date and time of modification
     # [<tt>:expires</tt>] date and time of expiration
     def domain_info(domain)
       response = query_no_raise :query_whois, domain: domain
@@ -45,12 +46,14 @@ module JokerDMAPI
                 result[:registrant].merge! line_parsed
               when :address_1, :address_2, :address_3 then
                 result[:registrant] = {} unless result.has_key? :registrant
-                result[:registrant][:address] = [] unless result[:registrant].has_key? :address
-                result[:registrant][:address] << value
+                result[:registrant].merge! line_parsed
               when :reseller_line then
                 result[:reseller_lines] = [] unless result.has_key? :reseller_lines
                 result[:reseller_lines] << value
               when :created_date, :modified_date, :expires then
+                key = :created_at if key == :created_date
+                key = :updated_at if key == :modified_date
+
                 result[key] = DateTime.parse value
               when :admin_c, :tech_c, :billing_c then
                 result.merge! line_parsed
