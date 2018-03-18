@@ -146,8 +146,6 @@ module JokerDMAPI
       raise ArgumentError, "Required fields not found" unless (CONTACT_REQUIRED - fields.keys).empty?
       raise ArgumentError, "TLD must be one of accepted" unless self.tlds.include?(fields[:tld])
 
-      fields = fields.keep_if { |key, value| CONTACT_ALLOWED.include? key }
-
       fields[:individual] = 'Yes'
       fields[:individual] = 'No' if fields.key?(:organization) && fields[:organization].present?
 
