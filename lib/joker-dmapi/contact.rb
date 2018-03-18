@@ -2,9 +2,8 @@ require "date"
 
 module JokerDMAPI
   module Contact
-    CONTACT_REQUIRED = [ :tld, :name, :email, :address, :city, :postal_code, :country, :phone ]
+    CONTACT_REQUIRED = [ :tld, :name, :email, :address_1, :address_2, :city, :postal_code, :country, :phone ]
     CONTACT_ALLOWED = CONTACT_REQUIRED + [ :organization, :state, :fax ]
-    CONTACT_LENGTH_LIMIT = %w(biz cn eu)
 
     # Returns the all contacts or <tt>[]</tt> if not exists
     def query_contact_list
@@ -26,7 +25,8 @@ module JokerDMAPI
     # Returned is a hash:
     # [<tt>:name</tt>] the contact's name
     # [<tt>:organization</tt>] the contact's organization name
-    # [<tt>:address</tt>] an array containing from one to three elements with contact's address
+    # [<tt>:address_1</tt>] the contact's main address
+    # [<tt>:address_2</tt>] the contact's main secondary address
     # [<tt>:city</tt>] the contact's city
     # [<tt>:state</tt>] the contact's state
     # [<tt>:postal_code</tt>] the contact's postal code
@@ -73,6 +73,8 @@ module JokerDMAPI
     # [<tt>:name</tt>] the contact's name
     # [<tt>:organization</tt>] the contact's organization name
     # [<tt>:address</tt>] an array containing from one to three elements with contact's address
+    # [<tt>:address_1</tt>] the contact's main address
+    # [<tt>:address_2</tt>] the contact's main secondary address
     # [<tt>:city</tt>] the contact's city
     # [<tt>:state</tt>] the contact's state
     # [<tt>:postal_code</tt>] the contact's postal code
@@ -112,7 +114,8 @@ module JokerDMAPI
     # Takes <tt>handle</tt> to select contact and contact's fields as hash:
     # [<tt>:name</tt>] the contact's name
     # [<tt>:organization</tt>] the contact's organization name
-    # [<tt>:address</tt>] an array containing from one to three elements with contact's address
+    # [<tt>:address_1</tt>] the contact's main address
+    # [<tt>:address_2</tt>] the contact's main secondary address
     # [<tt>:city</tt>] the contact's city
     # [<tt>:state</tt>] the contact's state
     # [<tt>:postal_code</tt>] the contact's postal code
@@ -141,29 +144,13 @@ module JokerDMAPI
 
     def contact_prepare(fields)
       raise ArgumentError, "Required fields not found" unless (CONTACT_REQUIRED - fields.keys).empty?
-      raise ArgumentError, "TLD must be one of accepted" unless self.tlds.include? fields[:tld]
-      if CONTACT_LENGTH_LIMIT.include? fields[:tld]
-        [ :name, :organization, :city, :state ].each do |field|
-          next unless fields.has_key? field
-          fields[field] = fields[field][0...30] # only 30 allowed
-        end
-        if fields.has_key? :address
-          fields[:address].map! { |addr| addr[0...30] }
-        end
-      end
+      raise ArgumentError, "TLD must be one of accepted" unless self.tlds.include?(fields[:tld])
+
       fields = fields.keep_if { |key, value| CONTACT_ALLOWED.include? key }
-      if fields.has_key? :organization and !fields[:organization].empty?
-        fields[:individual] = 'No'
-      else
-        fields[:individual] = 'Yes'
-      end
-      unless fields[:address].size > 0 and fields[:address].size <= 3
-        raise ArgumentError, "From one to three lines of address allowed"
-      end
-      (1..3).each do |index|
-        fields["address-" + index.to_s] = fields[:address][index-1].nil? ? '' : fields[:address][index-1]
-      end
-      fields.delete :address
+
+      fields[:individual] = 'Yes'
+      fields[:individual] = 'No' if fields.key?(:organization) && fields[:organization].present?
+
       fields
     end
   end
