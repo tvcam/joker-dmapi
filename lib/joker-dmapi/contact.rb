@@ -129,7 +129,7 @@ module JokerDMAPI
     #   [<tt>:proc_id</tt>] process ID (used at check result)
     #   [<tt>:tracking_id</tt>] tracking ID
     def contact_update(handle, fields)
-      fields = contact_prepare(fields)
+      # fields = contact_prepare(fields)
       fields[:handle] = handle
       query 'contact-modify', fields
     end

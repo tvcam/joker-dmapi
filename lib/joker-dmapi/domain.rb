@@ -99,6 +99,25 @@ module JokerDMAPI
       }
     end
 
+    # Check result of create contact
+    #
+    # Get <tt>proc_id</tt>
+    # Returned contact's handle name (and delete result) or <tt>nil</tt> if don't ready
+    def domain_create_result(proc_id)
+      result = parse_attributes(result_retrieve(proc_id)[:body].split("\n\n", 1)[0])
+      puts result
+      return nil unless result.has_key? :completion_status
+      case result[:completion_status]
+        when 'ack' then
+          result_delete proc_id
+          result[:object_name]
+        when 'nack' then
+          raise_response response
+        else
+          nil
+      end
+    end
+
     # Update domain
     #
     # Takes <tt>domain</tt> and domain's fields as hash:
