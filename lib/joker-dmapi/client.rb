@@ -85,6 +85,7 @@ module JokerDMAPI
       uri.query_values = params
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true
+      http.ssl_version = @ssl_version if @ssl_version
       http.verify_mode = OpenSSL::SSL::VERIFY_NONE
       puts ">> #{uri}" if ENV['JOKER_DMAPI_DEBUG']
       parse_response http.request(Net::HTTP::Get.new(uri.request_uri)).body
