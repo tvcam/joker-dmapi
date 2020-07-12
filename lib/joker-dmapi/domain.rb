@@ -112,7 +112,7 @@ module JokerDMAPI
           result_delete proc_id
           result[:object_name]
         when 'nack' then
-          raise_response response
+          raise_response result
         else
           nil
       end
