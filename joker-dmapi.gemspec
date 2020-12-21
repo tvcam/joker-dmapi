@@ -18,5 +18,6 @@ Gem::Specification.new do |gem|
   gem.require_paths = %w{lib}
 
   gem.add_dependency "addressable"
+  gem.add_dependency "httparty"
   gem.add_development_dependency "bundler"
 end
