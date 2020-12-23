@@ -104,7 +104,7 @@ module JokerDMAPI
 
     def raise_response(response)
       raise "\n\n" + (response[:headers].presence || response).inject([]) { |s, (key, value)| s << "#{key}: #{value}"}.join("\n") +
-              "\n\n" + (response[:body].presence) + "\n\n"
+              "\n\n" + (response[:body].presence || '') + "\n\n"
     end
   end
 end
