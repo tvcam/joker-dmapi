@@ -159,5 +159,13 @@ module JokerDMAPI
       fields[:domain] = domain
       query :domain_owner_change, fields
     end
+
+    def transfer_in(domain, transfer_auth_id, owner_c, other_fields = {})
+      other_fields[:domain] = domain
+      other_fields[:transfer_auth_id] = transfer_auth_id
+      other_fields[:owner_c] = owner_c
+
+      query :domain_transfer_in_reseller, other_fields
+    end
   end
 end
