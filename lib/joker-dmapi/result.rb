@@ -19,6 +19,12 @@ module JokerDMAPI
       end
     end
 
+    def request_status(proc_id)
+      response = result_retrieve(proc_id)
+      result = parse_attributes(response[:body].split("\n\n", 1)[0])
+      result[:completion_status].presence || 'ack'
+    end
+
     def result_retrieve(proc_id)
       query :result_retrieve, { proc_id: proc_id }
     end
