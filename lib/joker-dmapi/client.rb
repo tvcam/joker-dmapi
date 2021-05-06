@@ -40,7 +40,7 @@ module JokerDMAPI
 
     def query(request, params = {})
       response = query_no_raise request, params
-      raise_response(response) unless response[:headers][:status_code] == '0'
+      raise_response(response) unless success_reqeust?(response[:headers][:status_code].to_i)
       response
     end
 
@@ -50,6 +50,10 @@ module JokerDMAPI
     end
 
     private
+
+    def success_reqeust?(response_code)
+      response_code == 0 || response_code == 1000 || response_code >= 2000
+    end
 
     def query_no_raise(request, params = {})
       params['auth-sid'] = auth_sid
