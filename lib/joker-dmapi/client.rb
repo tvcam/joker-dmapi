@@ -17,12 +17,12 @@ module JokerDMAPI
     include JokerDMAPI::Host
     include JokerDMAPI::Domain
 
-    def initialize(username, password, uri = DEFAULT_URI)
-      @username, @password, @uri = username, password, uri
+    def initialize(api_key, uri = DEFAULT_URI)
+      @api_key, @uri = api_key, uri
     end
 
-    def self.connection(username, password, uri = DEFAULT_URI, &block)
-      connection = self.new(username, password, uri)
+    def self.connection(api_key, uri = DEFAULT_URI, &block)
+      connection = self.new(api_key, uri)
       if block_given?
         yield connection
         connection.logout
@@ -98,7 +98,7 @@ module JokerDMAPI
 
     def auth_sid
       if @auth_sid.nil?
-        response = request(:login, username: @username, password: @password)
+        response = request(:login, api_key: @api_key)
         raise "Authentication error" unless response[:headers].has_key? :auth_sid
         @auth_sid = response[:headers][:auth_sid]
         @tlds = response[:body].split "\n"
